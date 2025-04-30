@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">My Events</h2>
+
+<ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="organized-tab" data-bs-toggle="tab" data-bs-target="#organized" type="button">
+            Events I'm Organizing
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="registered-tab" data-bs-toggle="tab" data-bs-target="#registered" type="button">
+            Events I'm Attending
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="organized">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for event in organized_events %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.title }}</h5>
+                        <p class="card-text">{{ event.description[:150] }}{% if event.description|length > 150 %}...{% endif %}</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> {{ event.date.strftime('%B %d, %Y %I:%M %p') }}<br>
+                                <i class="fas fa-map-marker-alt"></i> {{ event.location }}<br>
+                                <i class="fas fa-users"></i> {{ event.registrations|length }}/{{ event.capacity }} registered
+                            </small>
+                        </p>
+                        <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <p>You haven't organized any events yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="tab-pane fade" id="registered">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for event in registered_events %}
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.title }}</h5>
+                        <p class="card-text">{{ event.description[:150] }}{% if event.description|length > 150 %}...{% endif %}</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> {{ event.date.strftime('%B %d, %Y %I:%M %p') }}<br>
+                                <i class="fas fa-map-marker-alt"></i> {{ event.location }}<br>
+                                <i class="fas fa-user"></i> Organized by: {{ event.organizer.username }}
+                            </small>
+                        </p>
+                        <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <p>You haven't registered for any events yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

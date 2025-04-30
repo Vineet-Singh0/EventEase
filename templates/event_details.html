@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        {% if event.photo %}
+        <img src="{{ url_for('static', filename='uploads/events/' + event.photo) }}" 
+             class="card-img-top event-banner-img" alt="{{ event.title }}">
+        {% endif %}
+        <div class="card-body">
+            <h1 class="card-title">{{ event.title }}</h1>
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <h4>Description</h4>
+                    <p>{{ event.description }}</p>
+                    
+                    <h4 class="mt-4">Event Details</h4>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-calendar me-2"></i> {{ event.date|to_ist|strftime('%B %d, %Y %I:%M %p') }} IST</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i> {{ event.location }}</li>
+                        <li><i class="fas fa-users me-2"></i> {{ event.registrations|length }}/{{ event.capacity }} registered</li>
+                        <li><i class="fas fa-user me-2"></i> Organized by: {{ event.organizer.username }}</li>
+                        {% if event.price > 0 %}
+                        <li><i class="fas fa-tag me-2"></i> Price: ₹{{ "%.2f"|format(event.price) }}</li>
+                        {% else %}
+                        <li><i class="fas fa-tag me-2"></i> Free Event</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            {% if current_user.is_authenticated %}
+                                {% if current_user.id != event.organizer_id %}
+                                    {% set is_registered = current_user.id in event.registrations|map(attribute='user_id')|list %}
+                                    {% if not is_registered and event.registrations|length < event.capacity %}
+                                        <form action="{{ url_for('register_event', event_id=event.id) }}" method="POST">
+                                            <button type="submit" class="btn btn-primary btn-lg w-100">Register for Event</button>
+                                        </form>
+                                    {% elif is_registered %}
+                                        <div class="alert alert-success">
+                                            You are registered for this event!
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            This event is full!
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        You are the organizer of this event
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-info">
+                                    Please <a href="{{ url_for('login') }}">login</a> to register for this event
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+.event-banner-img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    object-position: center;
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+    box-shadow: 0 2px 16px rgba(67, 206, 162, 0.10);
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Event Organizer Dashboard</h2>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('create_event') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Event
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-calendar-alt fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Total Events</h5>
+                    <p class="display-4 fw-bold">{{ organized_events|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-bolt fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Active Events</h5>
+                    <p class="display-4 fw-bold">{{ active_events|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Total Registrations</h5>
+                    <p class="display-4 fw-bold">{{ total_registrations }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Chart -->
+    <div class="row mb-4">
+        <div class="col-md-12 mb-4">
+            <div class="card rounded-4 shadow-sm">
+                <div class="card-header bg-white border-0 rounded-top-4">
+                    <h5 class="fw-bold mb-0">Registrations per Event</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="orgRegistrationsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Your Events</h3>
+        </div>
+        <div class="card-body">
+            {% if organized_events %}
+            <div class="accordion" id="eventsAccordion">
+                {% for event in organized_events %}
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="heading{{ event.id }}">
+                        <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#collapse{{ event.id }}" 
+                                aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" 
+                                aria-controls="collapse{{ event.id }}">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div>
+                                    <strong>{{ event.title }}</strong>
+                                    {% if event.date > now %}
+                                        <span class="badge bg-success ms-2">Upcoming</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary ms-2">Past</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-users me-1"></i> {{ event.registrations|length }}/{{ event.capacity }}
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse{{ event.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                         aria-labelledby="heading{{ event.id }}" data-bs-parent="#eventsAccordion">
+                        <div class="accordion-body">
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <p><strong>Description:</strong> {{ event.description }}</p>
+                                    <p><strong>Date:</strong> {{ event.date|to_ist|strftime('%B %d, %Y %I:%M %p') }} IST</p>
+                                    <p><strong>Location:</strong> {{ event.location }}</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-info btn-organizer-action">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-warning btn-organizer-action">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-users me-2"></i>Registered Attendees
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if event.registrations %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Username</th>
+                                                    <th>Email</th>
+                                                    <th>Registration Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for registration in event.registrations %}
+                                                <tr>
+                                                    <td>{{ registration.attendee.username }}</td>
+                                                    <td>{{ registration.attendee.email }}</td>
+                                                    <td>{{ registration.registration_date|to_ist|strftime('%B %d, %Y %I:%M %p') }} IST</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <p class="text-center text-muted mb-0">No attendees registered yet.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center">You haven't organized any events yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-stat {
+    border-radius: 1.5rem !important;
+    box-shadow: 0 8px 32px rgba(67, 206, 162, 0.13);
+    background: linear-gradient(120deg, #1A2E44 0%, #4f46e5 100%);
+    color: #fff;
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.dashboard-stat:hover {
+    box-shadow: 0 12px 32px rgba(67, 206, 162, 0.18);
+    transform: translateY(-4px) scale(1.03);
+}
+.dashboard-stat .fa-2x {
+    color: #43cea2;
+}
+.dashboard-stat .card-title {
+    font-family: 'Poppins', 'Inter', Arial, sans-serif;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.btn-organizer-action {
+    transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+.btn-organizer-action:hover, .btn-organizer-action:focus {
+    background: #43cea2 !important;
+    color: #fff !important;
+    transform: scale(1.04);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const orgRegistrationsCtx = document.getElementById('orgRegistrationsChart').getContext('2d');
+const orgRegistrationsChart = new Chart(orgRegistrationsCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ org_event_titles|safe }},
+        datasets: [{
+            label: 'Registrations',
+            data: {{ org_registrations_count|safe }},
+            backgroundColor: 'rgba(67, 206, 162, 0.7)',
+            borderColor: '#43cea2',
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+</script>
+{% endblock %} 

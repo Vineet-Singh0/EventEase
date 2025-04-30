@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Attendee Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="fw-bold" style="font-family: 'Poppins', sans-serif;">Event Attendee Dashboard</h2>
+        </div>
+        <div class="col text-end">
+            <a href="{{ url_for('events') }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm">
+                <i class="fas fa-search"></i> Browse Events
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-calendar-alt fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Upcoming Events</h5>
+                    <p class="display-4 fw-bold">{{ upcoming_events|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Total Registrations</h5>
+                    <p class="display-4 fw-bold">{{ registered_events|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-history fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Past Events</h5>
+                    <p class="display-4 fw-bold">{{ past_events|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Events Section -->
+    <div class="card mb-4 rounded-4 shadow-sm">
+        <div class="card-header bg-white border-0 rounded-top-4">
+            <h3 class="fw-bold mb-0" style="font-family: 'Poppins', sans-serif;">Your Upcoming Events</h3>
+        </div>
+        <div class="card-body">
+            {% if upcoming_events %}
+            <div class="accordion" id="upcomingEventsAccordion">
+                {% for event in upcoming_events %}
+                <div class="accordion-item mb-3 rounded-3">
+                    <h2 class="accordion-header" id="upcomingHeading{{ event.id }}">
+                        <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#upcomingCollapse{{ event.id }}" 
+                                aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" 
+                                aria-controls="upcomingCollapse{{ event.id }}">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div>
+                                    <strong>{{ event.title }}</strong>
+                                    <span class="badge" style="background: #43cea2; color: #fff;">Upcoming</span>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-calendar me-1"></i> {{ event.ist_date|strftime('%B %d, %Y') }}
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="upcomingCollapse{{ event.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                         aria-labelledby="upcomingHeading{{ event.id }}" data-bs-parent="#upcomingEventsAccordion">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p><strong>Description:</strong> {{ event.description }}</p>
+                                <p><strong>Date & Time:</strong> {{ event.ist_date|strftime('%B %d, %Y %I:%M %p') }} IST</p>
+                                <p><strong>Location:</strong> {{ event.location }}</p>
+                                <p><strong>Organizer:</strong> {{ event.organizer.username }}</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-muted mb-0">You have no upcoming events.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Available Events Section -->
+    <div class="card mb-4 rounded-4 shadow-sm">
+        <div class="card-header bg-white border-0 rounded-top-4">
+            <h3 class="fw-bold mb-0" style="font-family: 'Poppins', sans-serif;">Available Events</h3>
+        </div>
+        <div class="card-body">
+            {% if available_events %}
+            <div class="accordion" id="availableEventsAccordion">
+                {% for event in available_events %}
+                <div class="accordion-item mb-3 rounded-3">
+                    <h2 class="accordion-header" id="availableHeading{{ event.id }}">
+                        <button class="accordion-button collapsed" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#availableCollapse{{ event.id }}" 
+                                aria-expanded="false" 
+                                aria-controls="availableCollapse{{ event.id }}">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div>
+                                    <strong>{{ event.title }}</strong>
+                                    {% if event.price > 0 %}
+                                        <span class="badge bg-warning ms-2">₹{{ "%.2f"|format(event.price) }}</span>
+                                    {% else %}
+                                        <span class="badge" style="background: #43cea2; color: #fff;">Free</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-users me-1"></i> {{ event.registrations|length }}/{{ event.capacity }}
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="availableCollapse{{ event.id }}" class="accordion-collapse collapse" 
+                         aria-labelledby="availableHeading{{ event.id }}" data-bs-parent="#availableEventsAccordion">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {% if event.photo %}
+                                <img src="{{ url_for('static', filename='uploads/events/' + event.photo) }}" 
+                                     class="img-fluid rounded" alt="{{ event.title }}"
+                                     style="max-height: 200px; width: 100%; object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <p><strong>Description:</strong> {{ event.description }}</p>
+                                <p><strong>Date & Time:</strong> {{ event.ist_date|strftime('%B %d, %Y %I:%M %p') }} IST</p>
+                                <p><strong>Location:</strong> {{ event.location }}</p>
+                                <p><strong>Organizer:</strong> {{ event.organizer.username }}</p>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-info rounded-pill px-4 py-2 shadow-sm">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                    <form action="{{ url_for('register_event', event_id=event.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm">
+                                            <i class="fas fa-check"></i> Register
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-muted mb-0">No new events available for registration.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Past Events Section -->
+    <div class="card rounded-4 shadow-sm">
+        <div class="card-header bg-white border-0 rounded-top-4">
+            <h3 class="fw-bold mb-0" style="font-family: 'Poppins', sans-serif;">Past Events</h3>
+        </div>
+        <div class="card-body">
+            {% if past_events %}
+            <div class="accordion" id="pastEventsAccordion">
+                {% for event in past_events %}
+                <div class="accordion-item mb-3 rounded-3">
+                    <h2 class="accordion-header" id="pastHeading{{ event.id }}">
+                        <button class="accordion-button collapsed" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#pastCollapse{{ event.id }}" 
+                                aria-expanded="false" 
+                                aria-controls="pastCollapse{{ event.id }}">
+                            <div class="d-flex justify-content-between align-items-center w-100">
+                                <div>
+                                    <strong>{{ event.title }}</strong>
+                                    <span class="badge bg-secondary ms-2">Past</span>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-calendar me-1"></i> {{ event.ist_date|strftime('%B %d, %Y') }}
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="pastCollapse{{ event.id }}" class="accordion-collapse collapse" 
+                         aria-labelledby="pastHeading{{ event.id }}" data-bs-parent="#pastEventsAccordion">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p><strong>Description:</strong> {{ event.description }}</p>
+                                <p><strong>Date & Time:</strong> {{ event.ist_date|strftime('%B %d, %Y %I:%M %p') }} IST</p>
+                                <p><strong>Location:</strong> {{ event.location }}</p>
+                                <p><strong>Organizer:</strong> {{ event.organizer.username }}</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-secondary rounded-pill px-4 py-2 shadow-sm btn-view-details-past">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-center text-muted mb-0">You haven't attended any events yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-stat {
+    border-radius: 1.5rem !important;
+    box-shadow: 0 8px 32px rgba(67, 206, 162, 0.13);
+    background: linear-gradient(120deg, #1A2E44 0%, #4f46e5 100%);
+    color: #fff;
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.dashboard-stat:hover {
+    box-shadow: 0 12px 32px rgba(67, 206, 162, 0.18);
+    transform: translateY(-4px) scale(1.03);
+}
+.dashboard-stat .fa-2x {
+    color: #43cea2;
+}
+.dashboard-stat .card-title {
+    font-family: 'Poppins', 'Inter', Arial, sans-serif;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.btn-view-details-past {
+    transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+.btn-view-details-past:hover, .btn-view-details-past:focus {
+    background: #43cea2 !important;
+    color: #fff !important;
+    transform: scale(1.04);
+}
+</style>
+{% endblock %} 

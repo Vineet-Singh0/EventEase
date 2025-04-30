@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Upcoming Events</h1>
+    {% if upcoming_events %}
+    <div class="row">
+        {% for event in upcoming_events %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if event.photo %}
+                <img src="{{ url_for('static', filename='uploads/events/' + event.photo) }}" 
+                     class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
+                    <p class="card-text">
+                        <i class="bi bi-calendar"></i> {{ event.date|to_ist|strftime('%B %d, %Y %I:%M %p') }} IST<br>
+                        <i class="bi bi-geo-alt"></i> {{ event.location }}<br>
+                        <i class="bi bi-person"></i> By {{ event.organizer.username }}
+                    </p>
+                    <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No upcoming events at this time.
+    </div>
+    {% endif %}
+
+    <h1 class="mt-5">Past Events</h1>
+    {% if past_events %}
+    <div class="row">
+        {% for event in past_events %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-secondary">
+                {% if event.photo %}
+                <img src="{{ url_for('static', filename='uploads/events/' + event.photo) }}" 
+                     class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover; opacity: 0.7;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
+                    <p class="card-text">
+                        <i class="bi bi-calendar"></i> {{ event.date|to_ist|strftime('%B %d, %Y %I:%M %p') }} IST<br>
+                        <i class="bi bi-geo-alt"></i> {{ event.location }}<br>
+                        <i class="bi bi-person"></i> By {{ event.organizer.username }}
+                    </p>
+                    <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-secondary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No past events at this time.
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

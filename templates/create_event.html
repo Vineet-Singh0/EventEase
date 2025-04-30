@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <span class="mb-2" style="font-size:2.5rem; color:#43cea2;">
+                            <i class="fas fa-calendar-plus"></i>
+                        </span>
+                        <h2 class="fw-bold mb-2" style="font-family: 'Poppins', sans-serif;">Create New Event</h2>
+                        <p class="text-muted mb-0">Fill in the details below to add your event.</p>
+                    </div>
+                    <form method="POST" enctype="multipart/form-data" novalidate>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Event Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required placeholder="Enter event title" aria-label="Event Title">
+                            <div class="invalid-feedback">Please enter an event title.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required placeholder="Describe your event" aria-label="Event Description"></textarea>
+                            <div class="invalid-feedback">Please enter a description.</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Date & Time <span class="text-muted" data-bs-toggle="tooltip" title="All times are in IST (Asia/Kolkata)">(IST)</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                    <input type="datetime-local" class="form-control" id="date" name="date" required aria-label="Event Date and Time">
+                                    <div class="invalid-feedback">Please enter a valid date and time.</div>
+                                </div>
+                                <div class="form-text">All times are in IST (Asia/Kolkata).</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="capacity" class="form-label">Capacity <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Maximum number of attendees."></i></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                    <input type="number" class="form-control" id="capacity" name="capacity" min="1" required placeholder="e.g. 100" aria-label="Capacity">
+                                    <div class="invalid-feedback">Please enter a valid capacity (at least 1).</div>
+                                </div>
+                                <div class="form-text">Maximum number of attendees.</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="location" class="form-label">Location</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                    <input type="text" class="form-control" id="location" name="location" required placeholder="Event location" aria-label="Location">
+                                    <div class="invalid-feedback">Please enter a location.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label">Price <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Leave as 0 for free events."></i></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                                    <input type="number" class="form-control" id="price" name="price" min="0" step="0.01" value="0" placeholder="e.g. 500" aria-label="Price">
+                                    <div class="invalid-feedback">Please enter a valid price (0 or more).</div>
+                                </div>
+                                <div class="form-text">Leave as 0 for free events.</div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="photo" class="form-label">Event Image</label>
+                            <input class="form-control" type="file" id="photo" name="photo" accept="image/*" onchange="previewImage(event)">
+                            <div class="mt-2">
+                                <img id="imagePreview" src="#" alt="Image Preview" style="display:none; max-width:100%; border-radius:1rem; box-shadow:0 2px 8px rgba(67,206,162,0.10);"/>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm" style="background: linear-gradient(90deg, #43cea2 0%, #4f46e5 100%); border: none;">
+                                <i class="fas fa-plus"></i> Create Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+// Image preview
+function previewImage(event) {
+  const [file] = event.target.files;
+  const preview = document.getElementById('imagePreview');
+  if (file) {
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+// Bootstrap validation
+(function () {
+  'use strict';
+  var forms = document.querySelectorAll('form[novalidate]');
+  Array.prototype.slice.call(forms).forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+// Enable Bootstrap tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+</script>
+{% endblock %} 

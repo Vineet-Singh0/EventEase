@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Basic Profile Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>My Profile
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <!-- Username -->
+                    <div class="row mb-3 profile-item">
+                        <div class="col-sm-3">
+                            <strong>Username</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ user.username }}
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="row mb-3 profile-item">
+                        <div class="col-sm-3">
+                            <strong>Email</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {{ user.email }}
+                        </div>
+                    </div>
+
+                    <!-- Role Badge -->
+                    <div class="row mb-3 profile-item">
+                        <div class="col-sm-3">
+                            <strong>Role</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            {% if user.role == 'admin' %}
+                                <span class="badge bg-danger">Administrator</span>
+                            {% elif user.role == 'organizer' %}
+                                <span class="badge bg-warning text-dark">Event Organizer</span>
+                            {% else %}
+                                <span class="badge bg-info">Attendee</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Account Status -->
+                    <div class="row mb-3 profile-item">
+                        <div class="col-sm-3">
+                            <strong>Status</strong>
+                        </div>
+                        <div class="col-sm-9">
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle me-1"></i>Active
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Actions -->
+                <div class="card-footer">
+                    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                        <i class="bi bi-pencil-square me-1"></i>Edit Profile
+                    </a>
+                    <a href="{{ url_for('change_password') }}" class="btn btn-secondary ms-2">
+                        <i class="bi bi-key me-1"></i>Change Password
+                    </a>
+                </div>
+            </div>
+
+            <!-- Organizer's Events Section -->
+            {% if user.is_organizer() or user.is_admin() %}
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar2-event me-2"></i>Events I'm Organizing
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if user.events %}
+                        <div class="list-group">
+                            {% for event in user.events %}
+                                <a href="{{ url_for('event_details', event_id=event.id) }}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-1">{{ event.title }}</h6>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar3"></i>
+                                            {{ event.date.strftime('%b %d, %Y') }}
+                                        </small>
+                                    </div>
+                                    <p class="mb-1 text-muted">{{ event.description[:100] }}...</p>
+                                    <div class="mt-2">
+                                        <span class="badge {% if event.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {{ "Active" if event.is_active else "Inactive" }}
+                                        </span>
+                                        <small class="ms-2">
+                                            <i class="bi bi-people"></i>
+                                            {{ event.registrations|length }} attendees
+                                        </small>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x display-4"></i>
+                            <p class="mt-2">You haven't organized any events yet.</p>
+                            <a href="{{ url_for('create_event') }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus-circle me-1"></i>Create Your First Event
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- My Registrations Section -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-ticket-perforated me-2"></i>My Event Registrations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if user.registrations %}
+                        <div class="list-group">
+                            {% for registration in user.registrations %}
+                                <a href="{{ url_for('event_details', event_id=registration.event.id) }}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-1">{{ registration.event.title }}</h6>
+                                        <small class="text-muted">
+                                            Registered: {{ registration.registration_date.strftime('%b %d, %Y') }}
+                                        </small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <i class="bi bi-clock me-1"></i>
+                                        {{ registration.event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                                    </p>
+                                    <div class="mt-2">
+                                        <span class="badge {% if registration.event.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {{ "Active" if registration.event.is_active else "Inactive" }}
+                                        </span>
+                                        <small class="ms-2">
+                                            <i class="bi bi-person me-1"></i>
+                                            Organized by {{ registration.event.organizer.username }}
+                                        </small>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-ticket-detailed display-4"></i>
+                            <p class="mt-2">You haven't registered for any events yet.</p>
+                            <a href="{{ url_for('events') }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-search me-1"></i>Browse Events
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add some custom styles -->
+<style>
+    .profile-item {
+        transition: background-color 0.2s;
+        padding: 10px 5px;
+        border-radius: 4px;
+    }
+    
+    .profile-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .list-group-item-action:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s;
+    }
+</style>
+{% endblock %} 

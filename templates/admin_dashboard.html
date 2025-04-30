@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Total Users</h5>
+                    <p class="display-4 fw-bold">{{ total_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-calendar-alt fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Total Events</h5>
+                    <p class="display-4 fw-bold">{{ total_events }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-stat card border-0 text-center mb-4">
+                <div class="card-body">
+                    <div class="mb-2">
+                        <i class="fas fa-ticket-alt fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Total Registrations</h5>
+                    <p class="display-4 fw-bold">{{ total_registrations }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts -->
+    <div class="row mb-4">
+        <div class="col-md-8 mb-4">
+            <div class="card rounded-4 shadow-sm">
+                <div class="card-header bg-white border-0 rounded-top-4">
+                    <h5 class="fw-bold mb-0">Registrations per Event</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="registrationsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card rounded-4 shadow-sm">
+                <div class="card-header bg-white border-0 rounded-top-4">
+                    <h5 class="fw-bold mb-0">User Roles Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="rolesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">User Management</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                Add User
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'organizer' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ user.role|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary btn-admin-action" onclick="editUser({{ user.id }})">Edit</button>
+                                <button class="btn btn-sm btn-danger btn-admin-action" onclick="deleteUser({{ user.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Management -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Event Management</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                Add Event
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Organizer</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td>{{ event.id }}</td>
+                            <td>{{ event.title }}</td>
+                            <td>{{ event.date|to_ist|strftime('%Y-%m-%d %I:%M %p') }} IST</td>
+                            <td>{{ event.organizer.username }}</td>
+                            <td>
+                                <span class="badge {% if event.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ "Active" if event.is_active else "Inactive" }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary btn-admin-action" onclick="editEvent({{ event.id }})">Edit</button>
+                                <button class="btn btn-sm btn-danger btn-admin-action" onclick="deleteEvent({{ event.id }})">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_add_user') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="user">User</option>
+                            <option value="organizer">Organizer</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Event Modal -->
+<div class="modal fade" id="addEventModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin_add_event') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date and Time</label>
+                        <input type="datetime-local" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="venue" class="form-label">Venue</label>
+                        <input type="text" class="form-control" id="venue" name="venue" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="organizer" class="form-label">Organizer</label>
+                        <select class="form-select" id="organizer" name="organizer_id" required>
+                            {% for organizer in organizers %}
+                            <option value="{{ organizer.id }}">{{ organizer.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                            <label class="form-check-label" for="is_active">Active Event</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for handling user/event actions -->
+<script>
+function editUser(userId) {
+    // Implement user edit functionality
+    window.location.href = `/admin/users/${userId}/edit`;
+}
+
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        fetch(`/admin/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error deleting user');
+            }
+        });
+    }
+}
+
+function editEvent(eventId) {
+    // Implement event edit functionality
+    window.location.href = `/admin/events/${eventId}/edit`;
+}
+
+function deleteEvent(eventId) {
+    if (confirm('Are you sure you want to delete this event?')) {
+        fetch(`/admin/events/${eventId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error deleting event');
+            }
+        });
+    }
+}
+</script>
+
+<style>
+.dashboard-stat {
+    border-radius: 1.5rem !important;
+    box-shadow: 0 8px 32px rgba(67, 206, 162, 0.13);
+    background: linear-gradient(120deg, #1A2E44 0%, #4f46e5 100%);
+    color: #fff;
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.dashboard-stat:hover {
+    box-shadow: 0 12px 32px rgba(67, 206, 162, 0.18);
+    transform: translateY(-4px) scale(1.03);
+}
+.dashboard-stat .fa-2x {
+    color: #43cea2;
+}
+.dashboard-stat .card-title {
+    font-family: 'Poppins', 'Inter', Arial, sans-serif;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+.btn-admin-action {
+    transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+.btn-admin-action:hover, .btn-admin-action:focus {
+    background: #43cea2 !important;
+    color: #fff !important;
+    transform: scale(1.04);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const registrationsCtx = document.getElementById('registrationsChart').getContext('2d');
+const registrationsChart = new Chart(registrationsCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ event_titles|safe }},
+        datasets: [{
+            label: 'Registrations',
+            data: {{ registrations_count|safe }},
+            backgroundColor: 'rgba(67, 206, 162, 0.7)',
+            borderColor: '#43cea2',
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+const rolesCtx = document.getElementById('rolesChart').getContext('2d');
+const rolesChart = new Chart(rolesCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ role_labels|safe }},
+        datasets: [{
+            data: {{ role_counts|safe }},
+            backgroundColor: [
+                'rgba(67, 206, 162, 0.7)',
+                'rgba(79, 70, 229, 0.7)',
+                'rgba(255, 206, 86, 0.7)'
+            ],
+            borderColor: [
+                '#43cea2',
+                '#4f46e5',
+                '#ffce56'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+    }
+});
+</script>
+{% endblock %} 

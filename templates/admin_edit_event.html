@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Event{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Edit Event</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('admin_edit_event', event_id=event.id) }}" method="POST">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ event.title }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required>{{ event.description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date and Time</label>
+                            <input type="datetime-local" class="form-control" id="date" name="date" 
+                                value="{{ event.date.strftime('%Y-%m-%dT%H:%M') }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="venue" class="form-label">Venue</label>
+                            <input type="text" class="form-control" id="venue" name="venue" value="{{ event.location }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="organizer" class="form-label">Organizer</label>
+                            <select class="form-select" id="organizer" name="organizer_id" required>
+                                {% for organizer in organizers %}
+                                <option value="{{ organizer.id }}" {% if organizer.id == event.organizer_id %}selected{% endif %}>
+                                    {{ organizer.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                    {% if event.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">Active Event</label>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Event</button>
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
