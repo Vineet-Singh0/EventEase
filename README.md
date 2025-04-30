@@ -1,24 +1,52 @@
-# EventEase: Event Management System
+# 🎉 EventEase – Event Management System
 
-A modern web-based event management system built with Flask and MySQL. EventEase allows users to create, manage, and register for events, with support for user roles, file uploads, and timezone-aware scheduling.
+**EventEase** is a user-friendly **Event Management System** developed using **Python Flask**, **MySQL**, and **Bootstrap**. The platform allows organizers to create and manage events with images, and attendees to browse and register for them. An admin dashboard is provided for overall platform monitoring and user/event management.
 
-## Features
+---
 
-- User authentication (register/login/logout)
-- Three user roles: **Admin**, **Organizer**, **Attendee**
-- Admin dashboard for managing users and events
-- Organizers can create, edit, and manage their own events
-- Attendees can browse, register, and view their events
-- Event photo upload and management
-- Timezone-aware (IST/Asia-Kolkata) event scheduling
-- Responsive design (Bootstrap 5)
-- ERD and architecture diagrams included
+## 🔧 Tech Stack
 
-## Prerequisites
+- **Backend**: Python (Flask)
+- **Frontend**: HTML, CSS, JavaScript (Bootstrap 5)
+- **Database**: MySQL (XAMPP)
+- **Tools**: Flask, XAMPP, VS Code
 
-- Python 3.8 or higher
-- MySQL Server (running locally)
-- pip (Python package installer)
+---
+
+## 📌 Key Features
+
+### 👥 User Roles & Authentication
+- **Login & Signup** with role-based access
+- Three roles:  
+  - 🛠️ **Admin**
+  - 🎤 **Organiser**
+  - 🙋 **Attendee**
+
+### 🏠 Home Page
+- Public landing page with event highlights and navigation links
+
+### 🧑‍💼 Admin Dashboard
+- View all users and events
+- Manage/Remove users and events
+- Monitor platform activity
+
+### 📅 Organiser Dashboard
+- Create and manage events
+- Upload event posters/images
+- View registered attendees for their events
+
+### 🙋 Attendee Dashboard
+- Browse upcoming events
+- Register for selected events
+- View list of events they’ve joined
+
+### 🖼️ Event Image Upload
+- Organisers can upload images (posters, flyers) while creating events
+- Uploaded images are displayed on event listings
+
+---
+
+## ⚙️ Setup Instructions
 
 ## Installation
 
@@ -60,37 +88,26 @@ A modern web-based event management system built with Flask and MySQL. EventEase
    ```
    The app will run on [http://localhost:5003](http://localhost:5003)
 
-## Usage
+---
 
-- **Register** a new account or **login** with existing credentials.
-- **Admins** can manage users and events from the admin dashboard.
-- **Organizers** can create and manage their own events, including uploading event photos.
-- **Attendees** can browse, register for, and view events.
-- All event times are shown in IST (Asia/Kolkata).
-- Uploaded event photos are stored in `static/uploads/events/`.
+## 📝 Future Enhancements
 
-## File Uploads
-- Allowed file types: `png`, `jpg`, `jpeg`, `gif`
-- Max file size: 16MB
-
-## Project Structure
-- `app.py` — Main Flask application
-- `static/` — Static files (CSS, images, uploads)
-- `templates/` — HTML templates
-- `requirements.txt` — Python dependencies
-- `architecture_diagram.png`, `erd_diagram.png` — System and database diagrams
-
-## Diagrams
-- **ERD**: `erd_diagram.png`
-- **Architecture**: `architecture_diagram.png`
-
-## Contributing
-1. Fork the repository
-2. Create a new branch for your feature
-3. Commit your changes
-4. Push to your branch
-5. Open a Pull Request
+- Admin approval for events  
+- Event categories, search & filter  
+- Email notifications for registration  
+- Organizer profiles & attendee profiles  
+- QR code or digital pass for event entry  
 
 ---
 
-*For any issues or questions, please open an issue on the repository.* 
+## 🤝 Contributions
+
+Contributions are welcome!  
+Fork the repository, make your changes, and submit a pull request.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
