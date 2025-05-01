@@ -46,9 +46,15 @@
 
 ---
 
+## ScreenShot
+![Home Page](static/images/home.jpeg)
+
+![Admin Page](static/images/admin.jpeg)
+
+
+
 ## ⚙️ Setup Instructions
 
-## Installation
 
 1. **Clone the repository:**
    ```bash
